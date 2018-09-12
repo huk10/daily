@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { TouchableOpacity, StyleSheet, Text, View, SectionList, Dimensions, Image } from 'react-native';
+import { TouchableOpacity, StyleSheet, Text, View, SectionList, Platform, Image } from 'react-native';
 import { getNewsLatest, befterNews } from '../../api/index';
 import { observer, inject } from 'mobx-react/custom';
 import { HomeSwiper } from './swiper';
@@ -8,7 +8,7 @@ import { NavigatorTitle } from '../../containers/navigator';
 import { Actions } from 'react-native-router-flux';
 import { ActrcleItem } from '../../mobx/store';
 import SplashScreen from 'react-native-splash-screen';
-import {getThemeStyle} from '../../Theme';
+import { getThemeStyle } from '../../Theme';
 
 export interface IHomeState {
   news: any;
@@ -45,8 +45,9 @@ export class Home extends Component<any, IHomeState> {
 
   componentDidMount() {
     this.getData();
-    console.warn(SplashScreen.hide)
-    SplashScreen && SplashScreen.hide();
+    if ( Platform.OS === 'android' && SplashScreen ) {
+      SplashScreen.hide();
+    }
   }
 
   getData() {
@@ -76,11 +77,12 @@ export class Home extends Component<any, IHomeState> {
       } );
   }
 
-  renderSectionTitle( title: string ) {
+  renderSectionTitle( item: any ) {
+    const title = util.timeToWeek( item.section.key );
     return (
-      <View style={styles.sectionTitle} >
-        <Text >{title}</Text >
-      </View >
+      <View style={styles.sectionTitle}>
+        <Text>{title}</Text>
+      </View>
     );
   }
 
@@ -135,14 +137,13 @@ export class Home extends Component<any, IHomeState> {
   }
 
 
-
   render() {
     const { news, opacity, isLoading, sectionList, title } = this.state;
     const { top_stories } = news;
-    const themeStyle = getThemeStyle('daytime');
+    const themeStyle = getThemeStyle( this.store.ThemeType );
     return (
-      <View style={{ flex: 1 }} >
-        <NavigatorTitle opacity={opacity} title={title} />
+      <View style={[ { flex: 1 }, themeStyle.mianBg ]}>
+        <NavigatorTitle opacity={opacity} title={title}/>
         <SectionList
           sections={sectionList}
           refreshing={isLoading}
@@ -150,27 +151,29 @@ export class Home extends Component<any, IHomeState> {
           onRefresh={() => this.getData()}
           onScroll={( event: any ) => this.handlerScroll( event.nativeEvent )}
           stickySectionHeadersEnabled={false}
-          ItemSeparatorComponent={() => <View style={styles.itemGap} ></View >}
-          ListHeaderComponent={<HomeSwiper data={top_stories} />}
-          renderSectionHeader={( item ) => this.renderSectionTitle( util.timeToWeek( item.section.key ) )}
+          ItemSeparatorComponent={() => <View style={styles.itemGap}></View>}
+          ListHeaderComponent={<HomeSwiper data={top_stories}/>}
+          renderSectionHeader={this.renderSectionTitle}
           renderItem={( { item }: any ) => {
-
-            const ItemIsOnStyle = [styles.listItemContainer, themeStyle.ItemColor]
-            if (this.handlerHasIsReadActrcle( item.id )) {
-              ItemIsOnStyle.push(themeStyle.ItemOnColor)
+            const ItemContainerStyle = [ styles.listItemContainer, themeStyle.ItemContainer ];
+            const ItemTextStyle = [ styles.item, themeStyle.ItemText ];
+            if ( this.handlerHasIsReadActrcle( item.id ) ) {
+              ItemContainerStyle.push( themeStyle.ItemOnContainer );
+              ItemTextStyle.push( themeStyle.ItemOnText );
             }
+
             return (
               <TouchableOpacity
-                style={ItemIsOnStyle}
+                style={ItemContainerStyle}
                 activeOpacity={0.7}
-                onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Home' } } )} >
-                <Text style={styles.item} numberOfLines={3} >{item.title}</Text >
-                <Image style={styles.image} source={{ uri: item.images ? item.images[ 0 ] : '' }} />
-              </TouchableOpacity >
+                onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Home' } } )}>
+                <Text style={ItemTextStyle} numberOfLines={3}>{item.title}</Text>
+                <Image style={styles.image} source={{ uri: item.images ? item.images[ 0 ] : '' }}/>
+              </TouchableOpacity>
             );
           }}
         />
-      </View >
+      </View>
     );
   }
 }

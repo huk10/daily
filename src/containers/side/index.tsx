@@ -3,9 +3,41 @@ import { View, StyleSheet, Text } from 'react-native';
 import { Navigator } from './navigatior';
 import { SideHeader } from './side_header';
 import { Icon, MaterialCommunityIcon } from '../../components/icon';
+import { observer, inject } from 'mobx-react';
 
-export class Side extends React.PureComponent {
+
+@inject( 'store' )
+@observer
+export class Side extends React.Component<any, any> {
+  store: any;
+
+  constructor( props: any ) {
+    super( props );
+    this.state = {
+      themeText: '夜间'
+    };
+    this.store = props.store.Store;
+  }
+
+
+  handlerSetThemeType() {
+    const { themeText } = this.state;
+
+    if ( themeText === '夜间' ) {
+      this.store.setThemeType( 'night' );
+      this.setState( {
+        themeText: '白天'
+      } );
+    } else {
+      this.store.setThemeType( 'daytime' );
+      this.setState( {
+        themeText: '夜间'
+      } );
+    }
+  }
+
   render() {
+    const { themeText } = this.state;
     return (
       <View style={styles.container}>
         <SideHeader/>
@@ -18,7 +50,7 @@ export class Side extends React.PureComponent {
           <View style={styles.footer_item}>
             {/*white-balance-sunny*/}
             <MaterialCommunityIcon name='weather-night' size={18} color='#666'/>
-            <Text style={styles.footer_item_text}>夜间</Text>
+            <Text style={styles.footer_item_text} onPress={() => this.handlerSetThemeType()}>{themeText}</Text>
           </View>
         </View>
       </View>

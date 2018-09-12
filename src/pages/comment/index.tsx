@@ -3,7 +3,7 @@ import {
   Dimensions, StyleSheet, View, Text, FlatList, PixelRatio, Image, Modal, TouchableOpacity, Platform
 } from 'react-native';
 import { getNewsLongComments, getNewsShortComments } from '../../api/index';
-import { Icon , MaterialCommunityIcon, FeatherIcon} from '../../components/icon';
+import { Icon, MaterialCommunityIcon, FeatherIcon } from '../../components/icon';
 import { util } from '../../utils';
 import { observer, inject } from 'mobx-react/custom';
 import { Actions } from 'react-native-router-flux';
@@ -194,7 +194,9 @@ export class Comment extends React.Component<any, ICommentState> {
   renderHeader( CommentTitle: string ) {
     const headerStyle = [];
     headerStyle.push( styles.header );
-    Platform.OS === 'ios' && headerStyle.push( { paddingTop: 17 } );
+    if ( Platform.OS === 'ios' ) {
+      headerStyle.push( { paddingTop: 17 } );
+    }
     return (
       <View style={headerStyle}>
         <Text style={styles.header_title}>{CommentTitle}</Text>
@@ -344,7 +346,11 @@ const styles = StyleSheet.create( {
   },
   footer_back: {
     position: 'absolute',
-    left: 20
+    left: 0,
+    paddingTop: 15,
+    height: 50,
+    width: 80,
+    alignItems: 'center',
   },
   short_comments_title_icon: {
     marginLeft: 'auto'

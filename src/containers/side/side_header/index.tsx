@@ -3,30 +3,40 @@ import { Platform, FlatList, View, StyleSheet, Text, Image } from 'react-native'
 import { Icon, FeatherIcon } from '../../../components/icon/index';
 
 import { Actions } from 'react-native-router-flux';
-import { ColorConfig } from '../../../config/config.color';
+import { getThemeStyle } from '../../../Theme';
+import { observer, inject } from 'mobx-react';
 
-export class SideHeader extends React.PureComponent {
+@inject( 'store' )
+@observer
+export class SideHeader extends React.PureComponent<any, {}> {
   render() {
+    const themeStyle = getThemeStyle( this.props.store.Store.ThemeType );
+
     const nickNamePic = 'https://pic3.zhimg.com/12a3e52f5b6b384722fe1621c0215495_im.jpg';
-    const IOSContainerPadding = { paddingTop: Platform.OS === 'ios' ? 17 : 5 };
+    const containerStyle = [ styles.container, { paddingTop: Platform.OS === 'ios' ? 17 : 5 } ];
+
+    containerStyle.push( themeStyle.sideHeaderContainer );
+
+    const textStyle = [ { marginTop: 5 }, themeStyle.sideHeaderText ];
+
     return (
-      <View style={[ styles.container, IOSContainerPadding ]}>
+      <View style={containerStyle}>
         <View style={styles.title}>
           <Image style={styles.image} source={{ uri: nickNamePic }}/>
-          <Text style={styles.nickName} onPress={Actions.Login}>请登录</Text>
+          <Text style={[ styles.nickName, themeStyle.sideHeaderText ]} onPress={Actions.Login}>请登录</Text>
         </View>
         <View style={styles.setting}>
           <View style={styles.col}>
             <Icon name='stars' size={18} color='white'/>
-            <Text style={{ color: 'white', marginTop: 5 }}>收藏</Text>
+            <Text style={textStyle}>收藏</Text>
           </View>
           <View style={styles.col}>
             <Icon name='info' size={18} color='white'/>
-            <Text style={{ color: 'white', marginTop: 5 }}>消息</Text>
+            <Text style={textStyle}>消息</Text>
           </View>
           <View style={styles.col}>
             <FeatherIcon name='settings' size={18} color='white'/>
-            <Text style={{ color: 'white', marginTop: 5 }}>设置</Text>
+            <Text style={textStyle}>设置</Text>
           </View>
         </View>
       </View>
@@ -37,7 +47,6 @@ export class SideHeader extends React.PureComponent {
 const styles = StyleSheet.create( {
   container: {
     height: 110,
-    backgroundColor: ColorConfig.header_color
   },
   title: {
     paddingLeft: 20,
@@ -62,7 +71,6 @@ const styles = StyleSheet.create( {
   nickName: {
     marginLeft: 15,
     fontSize: 16,
-    color: 'white'
   },
   col: {
     flexDirection: 'column',

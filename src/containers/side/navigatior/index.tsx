@@ -6,6 +6,7 @@ import { Actions } from 'react-native-router-flux';
 import { Loading } from '../../../components/Loading';
 import { observer, inject } from 'mobx-react';
 import { ColorConfig } from '../../../config/config.color';
+import { getThemeStyle } from '../../../Theme';
 
 interface INavigatorState {
   themes: any[];
@@ -57,8 +58,7 @@ export class Navigator extends React.Component<any, INavigatorState> {
 
   render() {
     const { themes = [], currentTheme } = this.state;
-    const currentColor = ColorConfig.sideNavigator_current;
-
+    const themeStyle = getThemeStyle( this.store.ThemeType );
 
     const SideNavigatorHome = ( props: any ) => {
       const { text, onPress, style } = props;
@@ -66,12 +66,12 @@ export class Navigator extends React.Component<any, INavigatorState> {
         <TouchableOpacity
           style={[ styles.item, style ]}
           activeOpacity={.8}
-          onPress={() => onPress()} >
-          <Icon name='home' size={18} color={ColorConfig.header_color} />
-          <Text style={[ styles.itemText, styles.itemText_home ]} >{text}</Text >
-        </TouchableOpacity >
+          onPress={() => onPress()}>
+          <Icon name='home' size={18} color={ColorConfig.header_color}/>
+          <Text style={[ styles.itemText, styles.itemText_home ]}>{text}</Text>
+        </TouchableOpacity>
       );
-    }
+    };
 
     const SideNavigatorItem = ( props: any ) => {
       const { style, onPress, text } = props;
@@ -79,33 +79,36 @@ export class Navigator extends React.Component<any, INavigatorState> {
         <TouchableOpacity
           style={[ styles.item, style ]}
           activeOpacity={.8}
-          onPress={() => onPress()} >
-          <Text style={styles.itemText} >{text}</Text >
-          <Icon style={styles.itemIcon} name='add' size={14} color={'#999'} />
-        </TouchableOpacity >
+          onPress={() => onPress()}>
+          <Text style={styles.itemText}>{text}</Text>
+          <Icon style={styles.itemIcon} name='add' size={14} color={'#999'}/>
+        </TouchableOpacity>
       );
-    }
+    };
+
+    const ItemOnStyle = themeStyle.SideItemOn;
+    const sideBg = themeStyle.SideContainer;
 
     return (
-      <View style={{ flex: 1 }} >
+      <View style={[ { flex: 1 }, sideBg ]}>
         <SideNavigatorHome
-          onPress={ () => this._toHome()}
+          onPress={() => this._toHome()}
           text='首页'
-          style={{ backgroundColor: !currentTheme ? currentColor : 'white' }} />
-        <View style={{ flex: 1 }} >
-          <Loading visible={themes.length === 0} />
+          style={!currentTheme ? ItemOnStyle : {}}/>
+        <View style={{ flex: 1 }}>
+          <Loading visible={themes.length === 0}/>
           <FlatList
             data={themes}
-            style={styles.container}
+            style={[ styles.container, sideBg ]}
             renderItem={( { item }: any ) => (
               <SideNavigatorItem
-                style={{ backgroundColor: currentTheme === item.id ? currentColor : 'white' }}
+                style={currentTheme === item.id ? ItemOnStyle : {}}
                 text={item.name}
-                onPress={() => this.handlerClick( item.id )} />
+                onPress={() => this.handlerClick( item.id )}/>
             )}
           />
-        </View >
-      </View >
+        </View>
+      </View>
     );
   }
 }
@@ -113,7 +116,6 @@ export class Navigator extends React.Component<any, INavigatorState> {
 const styles = StyleSheet.create( {
   container: {
     flex: 1,
-    backgroundColor: 'white',
   },
   item: {
     flexDirection: 'row',

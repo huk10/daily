@@ -25,8 +25,11 @@ class MyStore {
   @observable ThemeActrcles: Map<number | string, Map<number | string, ThemeActrcleItem>>;
 
   // 用于 快速切换上下文章
-  @observable ThemeList: Map<number | string, string[] | number[]>;
-  @observable ActrcleList: string[] | number[];
+  @observable ThemeList: Map<number | string, number[]>;
+  @observable ActrcleList: number[];
+
+  @observable ThemeType: string;
+
 
   constructor() {
     this.newsDate = 0;
@@ -35,6 +38,14 @@ class MyStore {
     this.ThemeActrcles = new Map();
     this.ThemeList = new Map();
     this.ActrcleList = [];
+
+    this.ThemeType = 'daytime';
+
+    AppStorage.getData( 'ThemeType' ).then( res => {
+      if ( res ) {
+        this.ThemeType = res;
+      }
+    } );
 
     AppStorage.getData( 'ReadActionList' ).then( res => {
       if ( res ) {
@@ -47,6 +58,13 @@ class MyStore {
         this.ThemeActrcles = new Map( JSON.parse( res ) );
       }
     } );
+  }
+
+  // 设置 主题颜色
+
+  @action setThemeType( type: string ) {
+    this.ThemeType = type;
+    AppStorage.setData( 'ThemeType', type );
   }
 
   // 添加阅读记录
@@ -106,15 +124,16 @@ class MyStore {
   }
 
   // 添加日报列表
-  @action appendActrcleList( item: string[] | number[] ) {
-    const has = this.ActrcleList.find( value => value === item );
-    if ( !has ) {
-      this.ActrcleList.push( item );
-    }
+  @action appendActrcleList( list: number[] ) {
+    list.forEach( ( item: number ) => {
+      if ( !this.ActrcleList.find( ( val: number ) => val === item ) ) {
+        this.ActrcleList.push( item );
+      }
+    } );
   }
 
   // 获取下一篇 日报
-  @action getAfterActicle( id: string | number ): number | null {
+  @action getAfterActicle( id: number ): number | null {
     const index = this.ActrcleList.indexOf( id );
     if ( index !== -1 ) {
       return index >= 0 ? index - 1 : null;
@@ -124,10 +143,10 @@ class MyStore {
   }
 
   // 获取上一篇日报
-  @action getBeforeActrcle( id: string | number ): number {
-    const index = this.ActrcleList.indexOf( id );
+  @action getBeforeActrcle( id: number ): number | null {
+    const index: number = this.ActrcleList.indexOf( id );
     if ( index !== -1 ) {
-      let len = this.ActrcleList.length;
+      const len = this.ActrcleList.length;
       return index <= len ? index + 1 : null;
     } else {
       return null;
@@ -135,15 +154,42 @@ class MyStore {
   }
 
   // 添加主题日报列表
-  @action appendThemeActrcleList( themeId: string | number, item: string | number ) {
+  @action appendThemeActrcleList( themeId: string | number, items: number[] ) {
     if ( this.ThemeList.has( themeId ) ) {
-      const Theme = this.ThemeList.get( themeId );
-      const has = Theme.find( value => value === item );
-      if ( !has ) {
-        Theme.push( item );
-      }
+      const theme = this.ThemeList.get( themeId );
+
+      items.forEach( item => {
+        if ( theme!.indexOf( item ) !== -1 ) {
+          theme!.push( item );
+        }
+      } );
+
+      this.ThemeList.set( themeId, theme! );
+
     } else {
-      this.ThemeList.set( themeId, [ item ] );
+      this.ThemeList.set( themeId, items );
+    }
+  }
+
+  // 上一篇主题日报
+  @action getBeforThemeActrc( themeid: string | number, id: number ) {
+    if ( this.ThemeList.has( themeid ) ) {
+      const theme = this.ThemeList.get( themeid );
+      const index = theme!.indexOf( id );
+      return index > 0 ? index - 1 : null;
+    } else {
+      return null;
+    }
+  }
+
+  // 下一篇主题日报
+  @action getAfterThemeActrc( themeid: string | number, id: number ) {
+    if ( this.ThemeList.has( themeid ) ) {
+      const theme = this.ThemeList.get( themeid );
+      const index = theme!.indexOf( id );
+      return index < theme!.length - 1 ? index + 1 : null;
+    } else {
+      return null;
     }
   }
 }
@@ -151,4 +197,3 @@ class MyStore {
 const Store = new MyStore();
 
 export { Store };
-

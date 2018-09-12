@@ -8,7 +8,6 @@ import { SectionFooter } from './articleFooter';
 import { ArticleHeader } from './articleHeader';
 import { ActicleHeaderNavigatorAndroid } from '../../platform/Android_component/ActicleHeaderNavigatorAndroid';
 import { observer, inject } from 'mobx-react/custom';
-import { AppStorage } from '../../AsyncStorage';
 
 export interface IArticleProps {
   param: any;
@@ -35,7 +34,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     super( props );
     this.state = {
       height: 0,
-      loading: false,
+      loading: true,
       showHeader: true,
       storyExtra: {},
       article: {
@@ -123,7 +122,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
   }
 
   handlerRefresh () {
-    this.store.Acticle
+    // this.store.Acticle
   }
 
   render() {
@@ -147,7 +146,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     return (
       <View style={{ flex: 1, backgroundColor: 'white' }} >
         <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id} />
-        {!article.body ? <Loading /> : (
+        {!article.body ? <Loading  size={45} type={1} color='#aaa' /> : (
           <FlatList
             data={[ { key: '1' } ]}
             style={{ flex: 1 }}
@@ -163,7 +162,12 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
             refreshControl={Platform.OS === 'ios' ? <Refresh /> : undefined}
             renderItem={() => (
               <View style={{ flex: 1 }} >
-                <Loading top={300} visible={loading} ></Loading >
+                <Loading
+                  top={100}
+                  visible={loading}
+                  size={45}
+                  type={1}
+                  color='#aaa'/>
                 <WebView
                   automaticallyAdjustContentInsets={false}
                   javaScriptEnabled={true}
