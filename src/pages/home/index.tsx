@@ -44,19 +44,19 @@ export class Home extends Component<any, IHomeState> {
   }
 
   componentDidMount() {
-    (async () => {
+    ( async () => {
       await this.getData();
       if ( Platform.OS === 'android' && SplashScreen ) {
-          SplashScreen.hide();
+        SplashScreen.hide();
       }
-    })();
+    } )();
   }
 
   async getData() {
     await this.setState( { isLoading: true } );
     try {
       const res = await getNewsLatest();
-      if (res) {
+      if ( res ) {
         this.setState( {
           news: res,
           sectionList: [ { key: res.date, data: res.stories } ],
@@ -71,19 +71,20 @@ export class Home extends Component<any, IHomeState> {
         } );
 
         this.store.appendReadActrcleList( newActrcleLists );
+        this.store.appendActrcleList( newActrcleLists.map( item => item.id ) );
 
       }
-    }catch ( err ) {
-        console.error( err.message );
-    } ;
+    } catch ( err ) {
+      console.error( err.message );
+    }
   }
 
   renderSectionTitle( item: any, textStyle: any ) {
     const title = util.timeToWeek( item.section.key );
     return (
-      <View style={styles.sectionTitle} >
-        <Text style={textStyle} >{title}</Text >
-      </View >
+      <View style={styles.sectionTitle}>
+        <Text style={textStyle}>{title}</Text>
+      </View>
     );
   }
 
@@ -126,6 +127,8 @@ export class Home extends Component<any, IHomeState> {
           newActrcleLists.push( { id: item.id, isRead: false } );
         } );
         this.store.appendReadActrcleList( newActrcleLists );
+        this.store.appendActrcleList( newActrcleLists.map( item => item.id ) );
+
       } )
       .catch( err => {
         console.error( err.message );
@@ -143,8 +146,8 @@ export class Home extends Component<any, IHomeState> {
     const { top_stories } = news;
     const themeStyle = getThemeStyle( this.store.ThemeType );
     return (
-      <View style={[ { flex: 1 }, themeStyle.mianBg ]} >
-        <NavigatorTitle opacity={opacity} title={title} />
+      <View style={[ { flex: 1 }, themeStyle.mianBg ]}>
+        <NavigatorTitle opacity={opacity} title={title}/>
         <SectionList
           sections={sectionList}
           refreshing={isLoading}
@@ -152,8 +155,8 @@ export class Home extends Component<any, IHomeState> {
           onRefresh={() => this.getData()}
           onScroll={( event: any ) => this.handlerScroll( event.nativeEvent )}
           stickySectionHeadersEnabled={false}
-          ItemSeparatorComponent={() => <View style={styles.itemGap} ></View >}
-          ListHeaderComponent={<HomeSwiper data={top_stories} />}
+          ItemSeparatorComponent={() => <View style={styles.itemGap}></View>}
+          ListHeaderComponent={<HomeSwiper data={top_stories}/>}
           renderSectionHeader={( item: any ) => this.renderSectionTitle( item, themeStyle.ItemSectionTitle )}
           renderItem={( { item }: any ) => {
             const ItemContainerStyle = [ styles.listItemContainer, themeStyle.ItemContainer ];
@@ -166,14 +169,14 @@ export class Home extends Component<any, IHomeState> {
               <TouchableOpacity
                 style={ItemContainerStyle}
                 activeOpacity={0.7}
-                onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Home' } } )} >
-                <Text style={ItemTextStyle} numberOfLines={3} >{item.title}</Text >
-                <Image style={styles.image} source={{ uri: item.images ? item.images[ 0 ] : '' }} />
-              </TouchableOpacity >
+                onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Home' } } )}>
+                <Text style={ItemTextStyle} numberOfLines={3}>{item.title}</Text>
+                <Image style={styles.image} source={{ uri: item.images ? item.images[ 0 ] : '' }}/>
+              </TouchableOpacity>
             );
           }}
         />
-      </View >
+      </View>
     );
   }
 }

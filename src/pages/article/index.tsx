@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { StyleSheet, View, WebView, FlatList, RefreshControl, Platform, PanResponder } from 'react-native';
+import { StyleSheet, View, WebView, FlatList, RefreshControl, Platform, PanResponder, TouchableWithoutFeedback } from 'react-native';
 import { ActicleFooterNavigatorIOS } from '../../platform/IOS_compontents/articleNavigatorIOS';
 import { setArticleHtml } from './articleHtml';
 import { getNewsBody, getNewsStoryExtra } from '../../api/index';
@@ -21,7 +21,11 @@ export interface IArticleState {
   article: any;
   storyExtra: any;
   type: string;
-  id: string| number;
+  id: string | number;
+  afterLoading: boolean;
+  getAfterconditionsIsOk: boolean;
+  beforLoading: boolean;
+  getBeforconditionsIsOk: boolean;
 }
 
 @inject( 'store' )
@@ -31,6 +35,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
   webView: any;
   _panResponder: any;
   store: any;
+  list: any;
 
   constructor( props: any ) {
     super( props );
@@ -41,11 +46,17 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       type: 'Home',
       storyExtra: {},
       id: '',
+      afterLoading: false,
       article: {
         css: [],
         js: []
       },
+      getAfterconditionsIsOk: false,
+      beforLoading: false,
+      getBeforconditionsIsOk: false,
+
     };
+    this.list = null;
     this.store = props.store.Store;
     this.insert = 'window.postMessage(JSON.stringify({type: \'setHeight\',height: document.documentElement.clientHeight}))';
     this.webView = null;
@@ -97,7 +108,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     } else {
       this.store.FixThemeActrcleList( id, { id, isRead: true } );
     }
-    this.getNewData(type, id);
+    this.getNewData( type, id );
   }
 
   onMessage( data: string ) {
@@ -113,12 +124,43 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
   handlerScroll( nativeEvent: any ) {
     const { contentSize, layoutMeasurement, contentOffset } = nativeEvent;
     if ( contentOffset.y - ( contentSize.height - layoutMeasurement.height ) >= 100 ) {
-      console.log( '下一篇' );
+      if ( !this.state.beforLoading ) {
+        this.setState( {
+          getBeforconditionsIsOk: true,
+        } );
+      }
+
+    } else if ( contentOffset.y < -100 ) {
+      if ( !this.state.afterLoading ) {
+        this.setState( {
+          getAfterconditionsIsOk: true
+        } );
+      }
+    }
+
+  }
+
+  handlerRefreshStart( ev: any ) {
+    const { contentSize, layoutMeasurement, contentOffset } = ev.nativeEvent;
+    const { getAfterconditionsIsOk, afterLoading, getBeforconditionsIsOk, beforLoading } = this.state;
+    if ( contentOffset.y < -100 && getAfterconditionsIsOk && !afterLoading ) {
+      this.setState( {
+        getAfterconditionsIsOk: false,
+        afterLoading: true
+      } );
       this.handlerAfterActrcle();
+    }
+    const bool = contentOffset.y - ( contentSize.height - layoutMeasurement.height ) >= 100;
+    if ( bool && !beforLoading && getBeforconditionsIsOk ) {
+      this.setState( {
+        getBeforconditionsIsOk: false,
+        beforLoading: true
+      } );
+      this.handlerRefresh();
     }
   }
 
-  async getNewData (type:string,id:number) {
+  async getNewData( type: string, id: number ) {
     const [ article_body, article_storyExtra ] = await Promise.all( [
       getNewsBody( id ),
       getNewsStoryExtra( id )
@@ -131,59 +173,67 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       id: id
     } );
   }
-  handlerRefresh () {
-    const {type, id} = this.state;
-    if (type === 'Home') {
-      const beforId = this.store.getBeforeActrcle(id);
-      if (beforId) {
-        this.getNewData(type, beforId);
+
+  async handlerRefresh() {
+    const { type, id } = this.state;
+    if ( type === 'Home' ) {
+      const beforId = this.store.getBeforeActrcle( id );
+      if ( beforId ) {
+        await this.getNewData( type, beforId );
       }
     } else {
-      const beforId = this.store.getBeforThemeActrc(id);
-      if (beforId) {
-        this.getNewData(type, beforId);
+      const beforId = this.store.getBeforThemeActrc( id );
+      console.log( beforId );
+      if ( beforId ) {
+        await this.getNewData( type, beforId );
       }
     }
   }
 
-  handlerAfterActrcle () {
-    const {type, id} = this.state;
-    if (type === 'Home') {
-      const AfterId = this.store.getAfterActicle(id);
-      if (AfterId) {
-        this.getNewData(type, AfterId);
+  async handlerAfterActrcle() {
+    const { type, id } = this.state;
+    if ( type === 'Home' ) {
+      const AfterId = this.store.getAfterActicle( id );
+      if ( AfterId ) {
+        await this.getNewData( type, AfterId );
+        this.setState( {
+          afterLoading: false
+        } );
+      } else {
+        await this.setState( {
+          afterLoading: false
+        } );
+        alert( '已经是第一篇了' );
       }
     } else {
-      const AfterId = this.store.getAfterThemeActrc(id);
-      if (AfterId) {
-        this.getNewData(type, AfterId);
+      const AfterId = this.store.getAfterThemeActrc( id );
+      if ( AfterId ) {
+        await this.getNewData( type, AfterId );
+        this.setState( {
+          afterLoading: false
+        } );
+      } else {
+        await this.setState( {
+          afterLoading: false
+        } );
+        alert( '已经是第一篇了' );
       }
     }
   }
 
   render() {
 
-    const { article, height, loading, showHeader, storyExtra } = this.state;
+    const { article, height, loading, showHeader, storyExtra, afterLoading } = this.state;
 
     const { css, js, body, title, image, image_source } = article;
 
     const htmlText = setArticleHtml( css, js, body );
 
-    const Refresh = (): JSX.Element => {
-      return (
-        <RefreshControl
-          refreshing={false}
-          title='载入上一篇'
-          onRefresh={() => this.handlerRefresh()}
-        />
-      );
-    };
     // {...this._panResponder.panHandlers}
-    console.warn(loading)
     return (
-      <View style={{ flex: 1, backgroundColor: 'white' }} >
-        <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id} />
-        {!article.body ? <Loading  size={45} type={1} color='#aaa' /> : (
+      <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id}/>
+        {!article.body ? <Loading size={45} type={1} color='#aaa'/> : (
           <FlatList
             data={[ { key: '1' } ]}
             style={{ flex: 1 }}
@@ -192,13 +242,14 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
                 visible={showHeader}
                 title={title}
                 image={image}
-                image_source={image_source} />
+                image_source={image_source}/>
             }
+            ref={( ref: any ) => this.list = ref}
             onScroll={( event: any ) => this.handlerScroll( event.nativeEvent )}
-            ListFooterComponent={<SectionFooter loading={true} section={article} />}
-            refreshControl={Platform.OS === 'ios' ? <Refresh /> : undefined}
+            onScrollEndDrag={( event: any ) => this.handlerRefreshStart( event )}
+            ListFooterComponent={<SectionFooter loading={true} section={article}/>}
             renderItem={() => (
-              <View style={{ flex: 1}} >
+              <View style={{ flex: 1, marginBottom: 60 }}>
                 <Loading
                   top={-180}
                   visible={loading}
@@ -215,12 +266,12 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
                   style={{ height }}
                   source={{ html: htmlText, baseUrl: '' }}
                 />
-              </View >
+              </View>
             )}
           />
         )}
-        <ActicleFooterNavigatorIOS context={storyExtra} id={article.id} />
-      </View >
+        <ActicleFooterNavigatorIOS context={storyExtra} id={article.id}/>
+      </View>
     );
   }
 }

@@ -58,7 +58,6 @@ class MyStore {
   }
 
   // 设置 主题颜色
-
   @action setThemeType( type: 'night' | 'daytime' ) {
     this.ThemeType = type;
     AppStorage.setData( 'ThemeType', type );
