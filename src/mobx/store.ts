@@ -6,34 +6,29 @@ export interface ActrcleItem {
   isRead: boolean;
 }
 
-export interface ThemeActrcleItem {
-  themeId: number;
-  isRead: boolean;
-  id: number;
-}
 
 
 class MyStore {
   // 主题id 用于获取数据
-  @observable ThemeId: number | null;
+  @observable ThemeId: number ;
 
   // 首页日报的日期, 用于回溯前一天的日报
   @observable newsDate: number | string;
 
   // 用于记录阅读记录
   @observable ActrcleLists: Map<number | string, ActrcleItem>;
-  @observable ThemeActrcles: Map<number | string, Map<number | string, ThemeActrcleItem>>;
+  @observable ThemeActrcles: Map<number | string, Map<number | string, ActrcleItem>>;
 
   // 用于 快速切换上下文章
   @observable ThemeList: Map<number | string, number[]>;
   @observable ActrcleList: number[];
 
-  @observable ThemeType: string;
+  @observable ThemeType: 'night' | 'daytime';
 
 
   constructor() {
     this.newsDate = 0;
-    this.ThemeId = null;
+    this.ThemeId = 0;
     this.ActrcleLists = new Map();
     this.ThemeActrcles = new Map();
     this.ThemeList = new Map();
@@ -42,8 +37,10 @@ class MyStore {
     this.ThemeType = 'daytime';
 
     AppStorage.getData( 'ThemeType' ).then( res => {
-      if ( res ) {
-        this.ThemeType = res;
+      if ( res && res.match( 'night' ) ) {
+        this.ThemeType = 'night';
+      } else {
+        this.ThemeType = 'daytime';
       }
     } );
 
@@ -62,7 +59,7 @@ class MyStore {
 
   // 设置 主题颜色
 
-  @action setThemeType( type: string ) {
+  @action setThemeType( type: 'night' | 'daytime' ) {
     this.ThemeType = type;
     AppStorage.setData( 'ThemeType', type );
   }
@@ -86,7 +83,7 @@ class MyStore {
   }
 
   // 添加主题日报阅读记录
-  @action appendReadThemeActrcleList( themeId: string | number, list: ThemeActrcleItem[] ) {
+  @action appendReadThemeActrcleList( themeId: string | number, list: ActrcleItem[] ) {
     list.forEach( item => {
       if ( this.ThemeActrcles.has( themeId ) ) {
         const Themes = this.ThemeActrcles.get( themeId );
@@ -101,14 +98,14 @@ class MyStore {
   }
 
   // 修改主题日报阅读记录
-  @action FixThemeActrcleList( ThemeId: string | number, key: string | number, value: ThemeActrcleItem ) {
-    if ( this.ThemeActrcles.has( ThemeId ) ) {
-      const Themes = this.ThemeActrcles.get( ThemeId );
+  @action FixThemeActrcleList( key: string | number, value: ActrcleItem ) {
+    if ( this.ThemeActrcles.has( this.ThemeId ) ) {
+      const Themes = this.ThemeActrcles.get( this.ThemeId );
       if ( Themes && Themes.has( key ) ) {
         Themes.set( key, value );
       }
     } else {
-      this.ThemeActrcles.set( ThemeId, new Map().set( key, value ) );
+      this.ThemeActrcles.set( this.ThemeId, new Map().set( key, value ) );
     }
     AppStorage.setData( 'ThemeActrcles', this.ThemeActrcles );
   }
@@ -136,7 +133,7 @@ class MyStore {
   @action getAfterActicle( id: number ): number | null {
     const index = this.ActrcleList.indexOf( id );
     if ( index !== -1 ) {
-      return index >= 0 ? index - 1 : null;
+      return index >= 0 ? this.ActrcleList[index - 1] : null;
     } else {
       return null;
     }
@@ -147,7 +144,7 @@ class MyStore {
     const index: number = this.ActrcleList.indexOf( id );
     if ( index !== -1 ) {
       const len = this.ActrcleList.length;
-      return index <= len ? index + 1 : null;
+      return index <= len ? this.ActrcleList[index + 1] : null;
     } else {
       return null;
     }
@@ -156,15 +153,15 @@ class MyStore {
   // 添加主题日报列表
   @action appendThemeActrcleList( themeId: string | number, items: number[] ) {
     if ( this.ThemeList.has( themeId ) ) {
-      const theme = this.ThemeList.get( themeId );
+      const theme: any = this.ThemeList.get( themeId );
 
       items.forEach( item => {
-        if ( theme!.indexOf( item ) !== -1 ) {
-          theme!.push( item );
+        if ( theme.indexOf( item ) !== -1 ) {
+          theme.push( item );
         }
       } );
 
-      this.ThemeList.set( themeId, theme! );
+      this.ThemeList.set( themeId, theme );
 
     } else {
       this.ThemeList.set( themeId, items );
@@ -174,9 +171,9 @@ class MyStore {
   // 上一篇主题日报
   @action getBeforThemeActrc( themeid: string | number, id: number ) {
     if ( this.ThemeList.has( themeid ) ) {
-      const theme = this.ThemeList.get( themeid );
-      const index = theme!.indexOf( id );
-      return index > 0 ? index - 1 : null;
+      const theme: any = this.ThemeList.get( themeid );
+      const index = theme.indexOf( id );
+      return index > 0 ? theme[index - 1] : null;
     } else {
       return null;
     }
@@ -185,9 +182,9 @@ class MyStore {
   // 下一篇主题日报
   @action getAfterThemeActrc( themeid: string | number, id: number ) {
     if ( this.ThemeList.has( themeid ) ) {
-      const theme = this.ThemeList.get( themeid );
-      const index = theme!.indexOf( id );
-      return index < theme!.length - 1 ? index + 1 : null;
+      const theme: any = this.ThemeList.get( themeid );
+      const index = theme.indexOf( id );
+      return index < theme.length - 1 ? theme[index + 1] : null;
     } else {
       return null;
     }

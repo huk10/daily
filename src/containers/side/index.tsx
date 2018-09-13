@@ -4,6 +4,7 @@ import { Navigator } from './navigatior';
 import { SideHeader } from './side_header';
 import { Icon, MaterialCommunityIcon } from '../../components/icon';
 import { observer, inject } from 'mobx-react';
+import { getThemeStyle } from '../../Theme';
 
 
 @inject( 'store' )
@@ -13,10 +14,10 @@ export class Side extends React.Component<any, any> {
 
   constructor( props: any ) {
     super( props );
-    this.state = {
-      themeText: '夜间'
-    };
     this.store = props.store.Store;
+    this.state = {
+      themeText: this.store.ThemeType === 'night' ? '白天': '夜间'
+    };
   }
 
 
@@ -38,19 +39,28 @@ export class Side extends React.Component<any, any> {
 
   render() {
     const { themeText } = this.state;
+    const {ThemeType} = this.store;
+    const IconType = ThemeType === 'night' ? 'white-balance-sunny':'weather-night';
+    const themeStyle = getThemeStyle(ThemeType);
     return (
       <View style={styles.container}>
         <SideHeader/>
         <Navigator/>
-        <View style={styles.footer}>
+        <View style={[styles.footer,themeStyle.Side_footer_container]}>
           <View style={styles.footer_item}>
-            <Icon name='download' size={18} color='#666'></Icon>
-            <Text style={styles.footer_item_text}>离线</Text>
+            <Icon name='download' size={18}
+                  color={ThemeType === 'night' ? 'white' : '#666'}></Icon>
+            <Text style={[styles.footer_item_text, themeStyle.Side_footer_text]}>离线</Text>
           </View>
           <View style={styles.footer_item}>
-            {/*white-balance-sunny*/}
-            <MaterialCommunityIcon name='weather-night' size={18} color='#666'/>
-            <Text style={styles.footer_item_text} onPress={() => this.handlerSetThemeType()}>{themeText}</Text>
+            <MaterialCommunityIcon
+              name={IconType}
+              size={18}
+              color={ThemeType === 'night' ? 'white' : '#666'}/>
+            <Text style={[styles.footer_item_text,themeStyle.Side_footer_text]}
+                  onPress={() => this.handlerSetThemeType()}>
+              {themeText}
+              </Text>
           </View>
         </View>
       </View>

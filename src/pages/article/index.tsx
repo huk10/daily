@@ -20,6 +20,8 @@ export interface IArticleState {
   showHeader: boolean;
   article: any;
   storyExtra: any;
+  type: string;
+  id: string| number;
 }
 
 @inject( 'store' )
@@ -36,7 +38,9 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       height: 0,
       loading: true,
       showHeader: true,
+      type: 'Home',
       storyExtra: {},
+      id: '',
       article: {
         css: [],
         js: []
@@ -86,22 +90,14 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     this.getArticleBody();
   }
 
-  async getArticleBody() {
+  getArticleBody() {
     const { id, type } = this.props.param;
-    const [ article_body, article_storyExtra ] = await Promise.all( [
-      getNewsBody( id ),
-      getNewsStoryExtra( id )
-    ] );
     if ( type === 'Home' ) {
       this.store.FixActrcleList( id, { id, isRead: true } );
     } else {
       this.store.FixThemeActrcleList( id, { id, isRead: true } );
     }
-    await this.setState( {
-      article: article_body,
-      showHeader: type === 'Home',
-      storyExtra: article_storyExtra
-    } );
+    this.getNewData(type, id);
   }
 
   onMessage( data: string ) {
@@ -118,11 +114,51 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     const { contentSize, layoutMeasurement, contentOffset } = nativeEvent;
     if ( contentOffset.y - ( contentSize.height - layoutMeasurement.height ) >= 100 ) {
       console.log( '下一篇' );
+      this.handlerAfterActrcle();
     }
   }
 
+  async getNewData (type:string,id:number) {
+    const [ article_body, article_storyExtra ] = await Promise.all( [
+      getNewsBody( id ),
+      getNewsStoryExtra( id )
+    ] );
+    await this.setState( {
+      article: article_body,
+      showHeader: type === 'Home',
+      storyExtra: article_storyExtra,
+      type: type === 'Home' ? 'Home' : 'Other',
+      id: id
+    } );
+  }
   handlerRefresh () {
-    // this.store.Acticle
+    const {type, id} = this.state;
+    if (type === 'Home') {
+      const beforId = this.store.getBeforeActrcle(id);
+      if (beforId) {
+        this.getNewData(type, beforId);
+      }
+    } else {
+      const beforId = this.store.getBeforThemeActrc(id);
+      if (beforId) {
+        this.getNewData(type, beforId);
+      }
+    }
+  }
+
+  handlerAfterActrcle () {
+    const {type, id} = this.state;
+    if (type === 'Home') {
+      const AfterId = this.store.getAfterActicle(id);
+      if (AfterId) {
+        this.getNewData(type, AfterId);
+      }
+    } else {
+      const AfterId = this.store.getAfterThemeActrc(id);
+      if (AfterId) {
+        this.getNewData(type, AfterId);
+      }
+    }
   }
 
   render() {
@@ -143,6 +179,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       );
     };
     // {...this._panResponder.panHandlers}
+    console.warn(loading)
     return (
       <View style={{ flex: 1, backgroundColor: 'white' }} >
         <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id} />
@@ -161,9 +198,9 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
             ListFooterComponent={<SectionFooter loading={true} section={article} />}
             refreshControl={Platform.OS === 'ios' ? <Refresh /> : undefined}
             renderItem={() => (
-              <View style={{ flex: 1 }} >
+              <View style={{ flex: 1}} >
                 <Loading
-                  top={100}
+                  top={-180}
                   visible={loading}
                   size={45}
                   type={1}
@@ -191,7 +228,6 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
 const styles = StyleSheet.create( {
   container: {
     flex: 1,
-    backgroundColor: 'white',
     borderColor: 'red',
     borderWidth: 1,
     borderStyle: 'solid'

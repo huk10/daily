@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
 
-export const DaytimeThemeStyle = StyleSheet.create({
+export const DaytimeThemeStyle = StyleSheet.create( {
   MianColor: {
     backgroundColor: 'rgb(0,162, 237)',
   },
-  sideHeaderContainer: {
+  SideHeaderContainer: {
     backgroundColor: 'rgb(0,162, 237)',
   },
-  sideHeaderText: {
+  SideHeaderText: {
     color: 'rgb(255,255,255)'
   },
   ActicleColor: {
@@ -15,7 +15,13 @@ export const DaytimeThemeStyle = StyleSheet.create({
     color: 'rgb(24,24,24)'
   },
   mianBg: {
-    backgroundColor: 'rgb(240,240,240)',
+    backgroundColor: 'rgb(240,240,240)'
+  },
+  home_header_bg: {
+    backgroundColor: 'rgba(0,162,237,1)'
+  },
+  ItemSectionTitle: {
+    color: 'rgb(64,64,64)'
   },
   ItemContainer: {
     backgroundColor: 'rgb(250,250,250)',
@@ -29,12 +35,36 @@ export const DaytimeThemeStyle = StyleSheet.create({
   ItemOnText: {
     color: 'rgb(144,144,144)'
   },
-  SideItemOn: {
+  SideItemText: {
+    color: '#333'
+  },
+  SideItemOnContainer: {
     backgroundColor: 'rgb(240,240,240)'
   },
   SideContainer: {
     backgroundColor: 'white',
+  },
+  Side_footer_container: {
+    backgroundColor: 'white',
+  },
+  Side_footer_text: {
+    color: '#333'
+  },
+  comment_nav_container: {
+    backgroundColor: 'rgba(0,162,237,1)'
+  },
+  comment_nav_text: {
+    color: 'white'
+  },
+  comment_more_bg: {
+    backgroundColor: 'rgb(240,240,240)'
+  },
+  comment_more_text: {
+    color: '#333'
+  },
+  comment_footer_bg: {
+    backgroundColor: '#999'
   }
-});
+} );
 
 

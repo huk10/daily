@@ -5,6 +5,7 @@ import { observer, inject } from 'mobx-react/custom';
 import { Actions } from 'react-native-router-flux';
 import { NavigatorTitle } from '../../containers/navigator';
 import { ThemeActrcleItem } from '../../mobx/store';
+import { getThemeStyle } from '../../Theme';
 
 // import { AppStorage } from '../../AsyncStorage';
 
@@ -39,6 +40,7 @@ class Thems extends React.Component<any, any> {
         newActrcleLists.push( { themeId: ThemeId, id: item.id, isRead: false } );
       } );
       this.store.appendReadThemeActrcleList( ThemeId, newActrcleLists );
+
     } ).catch( err => {
       console.error( err.message );
     } );
@@ -46,6 +48,7 @@ class Thems extends React.Component<any, any> {
 
   getBefterData() {
     const { thems, befterNewsId } = this.state;
+    const ThemeId = this.store.ThemeId;
     getBefterThemeBody( this.store.ThemeId, befterNewsId )
       .then( res => {
         const cloneNewList = JSON.parse( JSON.stringify( thems ) );
@@ -56,12 +59,12 @@ class Thems extends React.Component<any, any> {
           thems: cloneNewList,
           befterNewsId: res.stories[ res.stories.length - 1 ].id
         } );
-        // const ThemeMapId = this.store.ThemeMap.get( this.store.ThemeId ) ? this.store.ThemeMap.get( this.store.ThemeId ) : new Map();
-        // res.stories.forEach( ( item: any ) => {
-        //   if ( !ThemeMapId.has( item.id ) ) {
-        //     ThemeMapId.set( item.id, true );
-        //   }
-        // } );
+
+        const newActrcleLists: ThemeActrcleItem[ ] = [];
+        res.stories.forEach( ( item: any ) => {
+          newActrcleLists.push( { themeId: ThemeId, id: item.id, isRead: false } );
+        } );
+        this.store.appendReadThemeActrcleList( ThemeId, newActrcleLists );
       } )
       .catch( err => {
         console.error( err.message );
@@ -76,7 +79,7 @@ class Thems extends React.Component<any, any> {
     this.getData();
   }
 
-  _renderHeader( themes: any ) {
+  _renderHeader( themes: any, TextStyle:any ) {
     const { description, image, editors } = themes;
     const Content = (
       <View >
@@ -85,7 +88,7 @@ class Thems extends React.Component<any, any> {
           <Text style={styles.header_text} >{description}</Text >
         </View >
         <View style={styles.themes_news_editors} >
-          <Text style={styles.themes_news_editors_name} >主编 </Text >
+          <Text style={TextStyle} >主编 </Text >
           {
             editors.map( ( item: any, index: number ) => {
               return (
@@ -97,7 +100,6 @@ class Thems extends React.Component<any, any> {
                   <Image style={styles.themes_news_editors_pic}
                          source={{ uri: item.avatar }} />
                 </TouchableOpacity >
-
               );
             } )
           }
@@ -106,29 +108,45 @@ class Thems extends React.Component<any, any> {
     );
     return editors.length === 0 ? <View /> : Content;
   }
+  handlerHasIsReadActrcle (themeID: number, id: number) {
+    const isReadMap = this.store.ThemeActrcles.get(themeID);
+    if (isReadMap) {
+      return isReadMap.has( id ) && isReadMap.get( id ).isRead;
+    }
+    return false
+  }
 
   render() {
     const { stories, name } = this.state.thems;
+    const themeStyle = getThemeStyle( this.store.ThemeType );
     this.store.ThemeId; // 取一次值用于激活 mobx 以便响应数据
     return (
-      <View style={[ styles.container ]} >
+      <View style={[ styles.container ,themeStyle.mianBg]} >
         <NavigatorTitle title={name} opacity={1} />
         <FlatList
           data={stories}
           style={{ flex: 1 }}
           onEndReached={() => this.getBefterData()}
           onEndReachedThreshold={0.2}
-          ListHeaderComponent={() => this._renderHeader( this.state.thems )}
+          ListHeaderComponent={() => this._renderHeader( this.state.thems , themeStyle.ItemSectionTitle)}
           ItemSeparatorComponent={this._renderItemGap}
-          renderItem={( { item }: any ) => (
-            <TouchableOpacity
-              style={styles.listItemContainer}
-              activeOpacity={0.7}
-              onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Theme' } } )} >
-              <Text style={styles.item} numberOfLines={3} >{item.title}</Text >
-              {item.images ? <Image style={styles.image} source={{ uri: item.images[ 0 ] }} /> : null}
-            </TouchableOpacity >
-          )} />
+          renderItem={( { item }: any ) => {
+            const ItemContainerStyle = [ styles.listItemContainer, themeStyle.ItemContainer ];
+            const ItemTextStyle = [ styles.item, themeStyle.ItemText ];
+            if ( this.handlerHasIsReadActrcle(this.store.ThemeId, item.id ) ) {
+              ItemContainerStyle.push( themeStyle.ItemOnContainer );
+              ItemTextStyle.push( themeStyle.ItemOnText );
+            }
+            return (
+              <TouchableOpacity
+                style={ItemContainerStyle}
+                activeOpacity={0.7}
+                onPress={() => Actions.Article( { param: { 'id': item.id, type: 'Theme' } } )} >
+                <Text style={ItemTextStyle} numberOfLines={3} >{item.title}</Text >
+                {item.images ? <Image style={styles.image} source={{ uri: item.images[ 0 ] }} /> : null}
+              </TouchableOpacity >
+            )
+          }} />
       </View >
     );
   }
@@ -148,7 +166,6 @@ const styles = StyleSheet.create( {
     flexDirection: 'row',
     height: 80,
     borderRadius: 5,
-    backgroundColor: 'white'
   },
   itemGap: {
     height: 5
@@ -179,9 +196,6 @@ const styles = StyleSheet.create( {
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center'
-  },
-  themes_news_editors_name: {
-    color: '#666'
   },
   themes_news_editors_pic: {
     height: 32,

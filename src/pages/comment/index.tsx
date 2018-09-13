@@ -8,12 +8,14 @@ import { util } from '../../utils';
 import { observer, inject } from 'mobx-react/custom';
 import { Actions } from 'react-native-router-flux';
 import { ColorConfig } from '../../config/config.color';
+import { getThemeStyle } from '../../Theme';
 
 export interface ICommentState {
   short_comments: any[];
   long_comments: any[];
   short_comments_switch: boolean;
   modalVisible: boolean;
+  themeStyle: any;
 }
 
 @inject( 'store' )
@@ -27,7 +29,8 @@ export class Comment extends React.Component<any, ICommentState> {
       short_comments: [],
       long_comments: [],
       short_comments_switch: false,
-      modalVisible: false
+      modalVisible: false,
+      themeStyle: getThemeStyle(props.store.Store.ThemeType)
     };
     this.list = null;
   }
@@ -62,6 +65,7 @@ export class Comment extends React.Component<any, ICommentState> {
   }
 
   renderCommentsContext( item: any ) {
+    const {comment_more_bg, comment_more_text} = this.state.themeStyle;
 
     const ReplyTo = (
       <Text style={styles.reply_to}>
@@ -73,7 +77,9 @@ export class Comment extends React.Component<any, ICommentState> {
     );
 
     return (
-      <TouchableOpacity activeOpacity={.8} style={styles.comments_item_container} onPress={() => this.openModal()}>
+      <TouchableOpacity activeOpacity={.8}
+                        style={styles.comments_item_container}
+                        onPress={() => this.openModal()}>
         <View style={styles.comments_item_left}>
           <Image style={styles.comments_item_author_pic} source={{ uri: item.avatar }}></Image>
         </View>

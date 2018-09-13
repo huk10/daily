@@ -53,3 +53,33 @@ mobox 5以上版本使用了 react-native 不支持的东西
 "react-native": "0.55.4"
 "babel-preset-react-native": "2.1.0"
 ```
+
+### ios 默认不支持 http
+ 需要 在`xcode` `info.plist`文件中设置 
+
+## 组件
+
+### react-native-router-flux
+`react-native` 的路由组件, 支持侧边栏抽屉, 支持iOS和android
+
+### react-native-spinkit
+一个`loading` 组件, 支持iOS和android
+需要运行 `react-native link react-native-spinkit`
+组件需要安卓sdk不低于 25 需要改一下对应 `build.gradle` 里的版本
+
+### react-native-splash-screen
+启动屏幕  android使用, ios遇到包找不到的问题解决不了, ios使用 xcode 设置一下就好
+需要运行 `react-native link react-native-splash-screen`
+
+### react-native-snap-carousel react-native-swiper
+这两个都是 轮播图组件, 可以选用一个 支持iOS和android
+
+### react-native-vector-icons
+图标组件, 内置很多图标, 也可以添加自己的字体图标
+需要运行 `react-native link react-native-vector-icons`
+
+*在添加自己的图标时*
+
+android 需要将 .ttf 文件添加 到 `app/src/main/assets/fonts`
+
+ios 需要 在xcode info.plist中添加 

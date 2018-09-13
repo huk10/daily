@@ -62,31 +62,38 @@ export class Navigator extends React.Component<any, INavigatorState> {
 
     const SideNavigatorHome = ( props: any ) => {
       const { text, onPress, style } = props;
+      const itemStyle:any[] = [styles.item];
+      if (style) {
+        itemStyle.push(themeStyle.SideItemOnContainer);
+      }
       return (
         <TouchableOpacity
-          style={[ styles.item, style ]}
+          style={itemStyle}
           activeOpacity={.8}
           onPress={() => onPress()}>
           <Icon name='home' size={18} color={ColorConfig.header_color}/>
-          <Text style={[ styles.itemText, styles.itemText_home ]}>{text}</Text>
+          <Text style={[ styles.itemText, styles.itemText_home]}>{text}</Text>
         </TouchableOpacity>
       );
     };
 
     const SideNavigatorItem = ( props: any ) => {
       const { style, onPress, text } = props;
+      const itemStyle:any[] = [styles.item];
+      if (style) {
+        itemStyle.push(themeStyle.SideItemOnContainer);
+      }
       return (
         <TouchableOpacity
-          style={[ styles.item, style ]}
+          style={itemStyle}
           activeOpacity={.8}
           onPress={() => onPress()}>
-          <Text style={styles.itemText}>{text}</Text>
+          <Text style={[styles.itemText, themeStyle.SideItemText]}>{text}</Text>
           <Icon style={styles.itemIcon} name='add' size={14} color={'#999'}/>
         </TouchableOpacity>
       );
     };
 
-    const ItemOnStyle = themeStyle.SideItemOn;
     const sideBg = themeStyle.SideContainer;
 
     return (
@@ -94,7 +101,7 @@ export class Navigator extends React.Component<any, INavigatorState> {
         <SideNavigatorHome
           onPress={() => this._toHome()}
           text='首页'
-          style={!currentTheme ? ItemOnStyle : {}}/>
+          style={!currentTheme}/>
         <View style={{ flex: 1 }}>
           <Loading visible={themes.length === 0}/>
           <FlatList
@@ -102,7 +109,7 @@ export class Navigator extends React.Component<any, INavigatorState> {
             style={[ styles.container, sideBg ]}
             renderItem={( { item }: any ) => (
               <SideNavigatorItem
-                style={currentTheme === item.id ? ItemOnStyle : {}}
+                style={currentTheme === item.id }
                 text={item.name}
                 onPress={() => this.handlerClick( item.id )}/>
             )}
