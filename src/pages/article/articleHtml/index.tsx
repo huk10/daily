@@ -1,4 +1,4 @@
-export const setArticleHtml = ( cssSrcList: string[], jsSrcList: string[], body: string ) => {
+export const setArticleHtml = ( cssSrcList: string[], jsSrcList: string[], body: string , bool:boolean) => {
   let cssLink = '';
   cssSrcList.forEach( item => {
     cssLink += `\n<link rel="stylesheet" href="${item}">`;
@@ -13,8 +13,8 @@ export const setArticleHtml = ( cssSrcList: string[], jsSrcList: string[], body:
 			  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 				${cssLink}
 				<style>
-          .headline {
-              display: none;
+				  ${
+            !bool ?  '.headline{display: none;}' : '' 
           }
         </style>
 			</head>

@@ -4,7 +4,7 @@ import { getNewsThemeBody, getBefterThemeBody } from '../../api/index';
 import { observer, inject } from 'mobx-react/custom';
 import { Actions } from 'react-native-router-flux';
 import { NavigatorTitle } from '../../containers/navigator';
-import { ThemeActrcleItem } from '../../mobx/store';
+import { ActrcleItem } from '../../mobx/store';
 import { getThemeStyle } from '../../Theme';
 
 // import { AppStorage } from '../../AsyncStorage';
@@ -35,11 +35,12 @@ class Thems extends React.Component<any, any> {
         title: res.name,
         befterNewsId: res.stories[ res.stories.length - 1 ].id
       } );
-      const newActrcleLists: ThemeActrcleItem[ ] = [];
+      const newActrcleLists: ActrcleItem[ ] = [];
       res.stories.forEach( ( item: any ) => {
-        newActrcleLists.push( { themeId: ThemeId, id: item.id, isRead: false } );
+        newActrcleLists.push( { id: item.id, isRead: false } );
       } );
       this.store.appendReadThemeActrcleList( ThemeId, newActrcleLists );
+      this.store.appendThemeActrcleList(ThemeId, newActrcleLists.map(item => item.id));
 
     } ).catch( err => {
       console.error( err.message );
@@ -60,11 +61,12 @@ class Thems extends React.Component<any, any> {
           befterNewsId: res.stories[ res.stories.length - 1 ].id
         } );
 
-        const newActrcleLists: ThemeActrcleItem[ ] = [];
+        const newActrcleLists: ActrcleItem[ ] = [];
         res.stories.forEach( ( item: any ) => {
-          newActrcleLists.push( { themeId: ThemeId, id: item.id, isRead: false } );
+          newActrcleLists.push( { id: item.id, isRead: false } );
         } );
         this.store.appendReadThemeActrcleList( ThemeId, newActrcleLists );
+        this.store.appendThemeActrcleList(ThemeId, newActrcleLists.map(item => item.id));
       } )
       .catch( err => {
         console.error( err.message );
@@ -79,7 +81,7 @@ class Thems extends React.Component<any, any> {
     this.getData();
   }
 
-  _renderHeader( themes: any, TextStyle:any ) {
+  _renderHeader( themes: any, TextStyle: any ) {
     const { description, image, editors } = themes;
     const Content = (
       <View >
@@ -108,12 +110,13 @@ class Thems extends React.Component<any, any> {
     );
     return editors.length === 0 ? <View /> : Content;
   }
-  handlerHasIsReadActrcle (themeID: number, id: number) {
-    const isReadMap = this.store.ThemeActrcles.get(themeID);
-    if (isReadMap) {
+
+  handlerHasIsReadActrcle( themeID: number, id: number ) {
+    const isReadMap = this.store.ThemeActrcles.get( themeID );
+    if ( isReadMap ) {
       return isReadMap.has( id ) && isReadMap.get( id ).isRead;
     }
-    return false
+    return false;
   }
 
   render() {
@@ -121,19 +124,19 @@ class Thems extends React.Component<any, any> {
     const themeStyle = getThemeStyle( this.store.ThemeType );
     this.store.ThemeId; // 取一次值用于激活 mobx 以便响应数据
     return (
-      <View style={[ styles.container ,themeStyle.mianBg]} >
+      <View style={[ styles.container, themeStyle.mianBg ]} >
         <NavigatorTitle title={name} opacity={1} />
         <FlatList
           data={stories}
           style={{ flex: 1 }}
           onEndReached={() => this.getBefterData()}
           onEndReachedThreshold={0.2}
-          ListHeaderComponent={() => this._renderHeader( this.state.thems , themeStyle.ItemSectionTitle)}
+          ListHeaderComponent={() => this._renderHeader( this.state.thems, themeStyle.ItemSectionTitle )}
           ItemSeparatorComponent={this._renderItemGap}
           renderItem={( { item }: any ) => {
             const ItemContainerStyle = [ styles.listItemContainer, themeStyle.ItemContainer ];
             const ItemTextStyle = [ styles.item, themeStyle.ItemText ];
-            if ( this.handlerHasIsReadActrcle(this.store.ThemeId, item.id ) ) {
+            if ( this.handlerHasIsReadActrcle( this.store.ThemeId, item.id ) ) {
               ItemContainerStyle.push( themeStyle.ItemOnContainer );
               ItemTextStyle.push( themeStyle.ItemOnText );
             }
@@ -145,7 +148,7 @@ class Thems extends React.Component<any, any> {
                 <Text style={ItemTextStyle} numberOfLines={3} >{item.title}</Text >
                 {item.images ? <Image style={styles.image} source={{ uri: item.images[ 0 ] }} /> : null}
               </TouchableOpacity >
-            )
+            );
           }} />
       </View >
     );

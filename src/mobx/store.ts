@@ -10,7 +10,7 @@ export interface ActrcleItem {
 
 class MyStore {
   // 主题id 用于获取数据
-  @observable ThemeId: number ;
+  @observable ThemeId: number;
 
   // 首页日报的日期, 用于回溯前一天的日报
   @observable newsDate: number | string;
@@ -128,11 +128,13 @@ class MyStore {
     } );
   }
 
-  // 获取下一篇 日报
+  // 获取下一篇日报
   @action getAfterActicle( id: number ): number | null {
     const index = this.ActrcleList.indexOf( id );
+    console.log( index, id );
     if ( index !== -1 ) {
-      return index >= 0 ? this.ActrcleList[index - 1] : null;
+      const len = this.ActrcleList.length;
+      return index <= len ? this.ActrcleList[ index + 1 ] : null;
     } else {
       return null;
     }
@@ -141,9 +143,9 @@ class MyStore {
   // 获取上一篇日报
   @action getBeforeActrcle( id: number ): number | null {
     const index: number = this.ActrcleList.indexOf( id );
+    console.log( index, id );
     if ( index !== -1 ) {
-      const len = this.ActrcleList.length;
-      return index <= len ? this.ActrcleList[index + 1] : null;
+      return index > 0 ? this.ActrcleList[ index - 1 ] : null;
     } else {
       return null;
     }
@@ -167,23 +169,23 @@ class MyStore {
     }
   }
 
-  // 上一篇主题日报
-  @action getBeforThemeActrc( themeid: string | number, id: number ) {
+  // 下一篇主题日报
+  @action getBeforThemeActrc( themeid: number | string, id: number ) {
     if ( this.ThemeList.has( themeid ) ) {
       const theme: any = this.ThemeList.get( themeid );
       const index = theme.indexOf( id );
-      return index > 0 ? theme[index - 1] : null;
+      return index < theme.length - 1 ? theme[ index + 1 ] : null;
     } else {
       return null;
     }
   }
 
-  // 下一篇主题日报
-  @action getAfterThemeActrc( themeid: string | number, id: number ) {
+  // 上一篇主题日报
+  @action getAfterThemeActrc( themeid: number | string, id: number ) {
     if ( this.ThemeList.has( themeid ) ) {
       const theme: any = this.ThemeList.get( themeid );
       const index = theme.indexOf( id );
-      return index < theme.length - 1 ? theme[index + 1] : null;
+      return index > 0 ? theme[ index - 1 ] : null;
     } else {
       return null;
     }

@@ -26,7 +26,7 @@ export class Route extends React.Component {
             <Scene hideNavBar={true} component={Thems} key='Themes' />
           </Drawer >
           <Scene component={Editors} key='Editors' />
-          <Scene component={Article} hideNavBar={true} key='Article' />
+          <Scene component={Article} modal={true} hideNavBar={true} key='Article' />
           <Scene component={Comment} hideNavBar={true} key='Comment' />
           <Scene component={WriteComment} hideNavBar={true} key='WriteComment' />
           <Scene component={Login} hideNavBar={false} back={true} key='Login' title='登录' />
