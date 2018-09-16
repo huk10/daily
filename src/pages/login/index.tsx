@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { Icon } from '../../components/icon';
+import { Icon ,FontAwesome5Brands} from '../../components/icon';
 import { ColorConfig } from '../../config/config.color';
 
 export class Login extends React.PureComponent {
@@ -17,10 +17,10 @@ export class Login extends React.PureComponent {
           <Text style={styles.other}>或使用微博登录</Text>
           <View style={styles.other_login}>
             <TouchableOpacity activeOpacity={.9} style={styles.margin}>
-              <Icon name='info' size={45} color='red'/>
+              <FontAwesome5Brands name='weibo' size={45} color='#aaa'/>
             </TouchableOpacity>
             <TouchableOpacity activeOpacity={.9} style={styles.margin}>
-              <Icon name='info' size={45} color='red'/>
+              <FontAwesome5Brands name='tencent-weibo' size={45} color='#aaa'/>
             </TouchableOpacity>
           </View>
           <Text style={[ styles.footer_text, styles.text_color ]}>登录即代表你同意《知乎协议》</Text>

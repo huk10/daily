@@ -30,7 +30,7 @@ export class Comment extends React.Component<any, ICommentState> {
       long_comments: [],
       short_comments_switch: false,
       modalVisible: false,
-      themeStyle: getThemeStyle(props.store.Store.ThemeType)
+      themeStyle: getThemeStyle( props.store.Store.ThemeType )
     };
     this.list = null;
   }
@@ -65,7 +65,7 @@ export class Comment extends React.Component<any, ICommentState> {
   }
 
   renderCommentsContext( item: any ) {
-    const {comment_more_bg, comment_more_text} = this.state.themeStyle;
+    const { comment_more_bg, comment_more_text } = this.state.themeStyle;
 
     const ReplyTo = (
       <Text style={styles.reply_to}>
@@ -352,7 +352,7 @@ const styles = StyleSheet.create( {
   },
   footer_back: {
     position: 'absolute',
-    left: 0,
+    left: -10,
     paddingTop: 15,
     height: 50,
     width: 80,

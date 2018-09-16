@@ -7,7 +7,6 @@ export interface ActrcleItem {
 }
 
 
-
 class MyStore {
   // 主题id 用于获取数据
   @observable ThemeId: number;
@@ -129,9 +128,8 @@ class MyStore {
   }
 
   // 获取下一篇日报
-  @action getAfterActicle( id: number ): number | null {
+  @action getBeforeActrcle( id: number ): number | null {
     const index = this.ActrcleList.indexOf( id );
-    console.log( index, id );
     if ( index !== -1 ) {
       const len = this.ActrcleList.length;
       return index <= len ? this.ActrcleList[ index + 1 ] : null;
@@ -141,9 +139,8 @@ class MyStore {
   }
 
   // 获取上一篇日报
-  @action getBeforeActrcle( id: number ): number | null {
+  @action getAfterActicle( id: number ): number | null {
     const index: number = this.ActrcleList.indexOf( id );
-    console.log( index, id );
     if ( index !== -1 ) {
       return index > 0 ? this.ActrcleList[ index - 1 ] : null;
     } else {

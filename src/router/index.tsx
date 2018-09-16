@@ -14,24 +14,30 @@ import { Icon } from '../components/icon';
 export class Route extends React.Component {
   render() {
     return (
-      <Router >
-        <Stack key='Root' hideNavBar={true} >
+      <Router>
+        <Stack key='Root' hideNavBar={true}>
           <Drawer key='home_drawer'
                   hideNavBar={true}
-                  drawerIcon={() => ( <Icon name='list-row' size={18} color='white' style={styles.leftButton} /> )}
+                  drawerIcon={() => (
+                    <Icon
+                      name='list-row'
+                      size={18}
+                      color='white'
+                      style={styles.leftButton}/>
+                  )}
                   contentComponent={Side}
                   drawerWidth={300}
-                  drawerPosition={'left'} >
-            <Scene initial hideNavBar={true} component={Home} key='home' />
-            <Scene hideNavBar={true} component={Thems} key='Themes' />
-          </Drawer >
-          <Scene component={Editors} key='Editors' />
-          <Scene component={Article} modal={true} hideNavBar={true} key='Article' />
-          <Scene component={Comment} hideNavBar={true} key='Comment' />
-          <Scene component={WriteComment} hideNavBar={true} key='WriteComment' />
-          <Scene component={Login} hideNavBar={false} back={true} key='Login' title='登录' />
-        </Stack >
-      </Router >
+                  drawerPosition={'left'}>
+            <Scene initial hideNavBar={true} component={Home} key='home'/>
+            <Scene hideNavBar={true} component={Thems} key='Themes'/>
+          </Drawer>
+          <Scene component={Editors} key='Editors'/>
+          <Scene component={Article} modal={true} hideNavBar={true} key='Article'/>
+          <Scene component={Comment} hideNavBar={true} key='Comment'/>
+          <Scene component={WriteComment} hideNavBar={true} key='WriteComment'/>
+          <Scene component={Login} hideNavBar={false} back={true} key='Login' title='登录'/>
+        </Stack>
+      </Router>
     );
   }
 }

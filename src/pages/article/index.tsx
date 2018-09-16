@@ -8,6 +8,7 @@ import { SectionFooter } from './articleFooter';
 import { ArticleHeader } from './articleHeader';
 import { ActicleHeaderNavigatorAndroid } from '../../platform/Android_component/ActicleHeaderNavigatorAndroid';
 import { observer, inject } from 'mobx-react/custom';
+import { Actions } from 'react-native-router-flux';
 
 export interface IArticleProps {
   param: any;
@@ -26,6 +27,7 @@ export interface IArticleState {
   getAfterconditionsIsOk: boolean;
   beforLoading: boolean;
   getBeforconditionsIsOk: boolean;
+  htmlText: string;
 }
 
 @inject( 'store' )
@@ -40,7 +42,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
     super( props );
     this.state = {
       height: 0,
-      loading: true,
+      loading: false,
       showHeader: true,
       type: 'Home',
       storyExtra: {},
@@ -53,6 +55,7 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       getAfterconditionsIsOk: false,
       beforLoading: false,
       getBeforconditionsIsOk: false,
+      htmlText: ''
     };
     this.list = null;
     this.store = props.store.Store;
@@ -104,19 +107,30 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
 
   handlerRefreshStart( ev: any ) {
     const { contentSize, layoutMeasurement, contentOffset } = ev.nativeEvent;
-    const { getAfterconditionsIsOk, afterLoading, getBeforconditionsIsOk, beforLoading } = this.state;
-    if ( contentOffset.y < -100 && getAfterconditionsIsOk && !afterLoading ) {
+    const {
+      getAfterconditionsIsOk,
+      afterLoading,
+      getBeforconditionsIsOk,
+      beforLoading,
+      loading
+    } = this.state;
+
+    if ( contentOffset.y < -100 && getAfterconditionsIsOk && !afterLoading && !loading && !beforLoading ) {
       this.setState( {
         getAfterconditionsIsOk: false,
-        afterLoading: true
+        afterLoading: true,
+        htmlText: '',
+        height: 0
       } );
       this.handlerAfterActrcle();
     }
     const bool = contentOffset.y - ( contentSize.height - layoutMeasurement.height ) >= 100;
-    if ( bool && !beforLoading && getBeforconditionsIsOk ) {
+    if ( bool && !beforLoading && getBeforconditionsIsOk && !loading && !afterLoading ) {
       this.setState( {
         getBeforconditionsIsOk: false,
-        beforLoading: true
+        beforLoading: true,
+        htmlText: '',
+        height: 0
       } );
       this.handlerRefresh();
     }
@@ -127,12 +141,16 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       getNewsBody( id ),
       getNewsStoryExtra( id )
     ] );
+
+    const { css, js, body } = article_body;
+
     await this.setState( {
       article: article_body,
       showHeader: type === 'Home',
       storyExtra: article_storyExtra,
       type: type === 'Home' ? 'Home' : 'Other',
-      id: id
+      id: id,
+      htmlText: setArticleHtml(css, js, body, type !== 'Home')
     } );
   }
 
@@ -142,13 +160,25 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
       const beforId = this.store.getBeforeActrcle( id );
       if ( beforId ) {
         await this.getNewData( type, beforId );
-        this.webView.reload();
+        this.setState( {
+          beforLoading: false
+        } );
+      } else {
+        this.setState( {
+          beforLoading: false
+        } );
       }
     } else {
       const beforId = this.store.getBeforThemeActrc( this.store.ThemeId, id );
       if ( beforId ) {
         await this.getNewData( type, beforId );
-        this.webView.reload();
+        this.setState( {
+          beforLoading: false
+        } );
+      } else {
+        this.setState( {
+          beforLoading: false
+        } );
       }
     }
   }
@@ -166,7 +196,6 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
         await this.setState( {
           afterLoading: false
         } );
-        alert( '已经是第一篇了' );
       }
     } else {
       const AfterId = this.store.getAfterThemeActrc( this.store.ThemeId, id );
@@ -186,16 +215,31 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
 
   render() {
 
-    const { article, height, loading, showHeader, storyExtra, type } = this.state;
+    const {
+      article,
+      height,
+      loading,
+      showHeader,
+      storyExtra,
+      htmlText,
+      afterLoading,
+      beforLoading
+    } = this.state;
 
-    const { css, js, body, title, image, image_source } = article;
+    const {title, image, image_source } = article;
 
-    const htmlText = setArticleHtml( css, js, body, type !== 'Home' );
+    const ActicleLoading = (
+      <Loading top={-180}
+               visible={true}
+               size={45}
+               type={1}
+               color='#aaa'/>
+    );
 
     return (
-      <View style={{ flex: 1, backgroundColor: 'white' }} >
-        <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id} />
-        {!article.body ? <Loading size={45} type={1} color='#aaa' /> : (
+      <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <ActicleHeaderNavigatorAndroid context={storyExtra} id={article.id}/>
+        {!article.body ? <Loading size={45} type={1} color='#aaa'/> : (
           <FlatList
             data={[ { key: '1' } ]}
             style={{ flex: 1 }}
@@ -204,36 +248,34 @@ export class Article extends React.Component<IArticleProps, IArticleState> {
                 visible={showHeader}
                 title={title}
                 image={image}
-                image_source={image_source} />
+                image_source={image_source}/>
             }
             ref={( ref: any ) => this.list = ref}
             onScroll={( event: any ) => this.handlerScroll( event.nativeEvent )}
             onScrollEndDrag={( event: any ) => this.handlerRefreshStart( event )}
-            ListFooterComponent={<SectionFooter loading={true} section={article} />}
+            ListFooterComponent={<SectionFooter loading={true} section={article}/>}
             renderItem={() => (
-              <View style={{ flex: 1, marginBottom: Platform.OS === 'ios' ? 60 : 0 }} >
-                <Loading
-                  top={-180}
-                  visible={loading}
-                  size={45}
-                  type={1}
-                  color='#aaa' />
-                <WebView
-                  automaticallyAdjustContentInsets={false}
-                  javaScriptEnabled={true}
-                  domStorageEnabled={true}
-                  ref={( ref: any ) => this.webView = ref}
-                  onLoadEnd={() => this.webView.injectJavaScript( this.insert )}
-                  onMessage={( event ) => this.onMessage( event.nativeEvent.data )}
-                  style={{ height }}
-                  source={{ html: htmlText, baseUrl: '' }}
-                />
-              </View >
+              <View style={{ flex: 1, marginBottom: Platform.OS === 'ios' ? 60 : 0 }}>
+                {
+                  ( afterLoading || beforLoading || loading ) ? ActicleLoading : (
+                    <WebView
+                      automaticallyAdjustContentInsets={false}
+                      javaScriptEnabled={true}
+                      domStorageEnabled={true}
+                      ref={( ref: any ) => this.webView = ref}
+                      onLoadEnd={() => this.webView.injectJavaScript( this.insert )}
+                      onMessage={( event ) => this.onMessage( event.nativeEvent.data )}
+                      style={{ height }}
+                      source={{ html: htmlText, baseUrl: '' }}
+                    />
+                  )
+                }
+              </View>
             )}
           />
         )}
-        <ActicleFooterNavigatorIOS context={storyExtra} id={article.id} />
-      </View >
+        <ActicleFooterNavigatorIOS context={storyExtra} id={article.id}/>
+      </View>
     );
   }
 }

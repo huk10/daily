@@ -50,4 +50,8 @@ declare module 'react-native-vector-icons/Feather' {
   export = createIconSet;
 }
 
+declare module 'react-native-vector-icons/FontAwesome5' {
+  function createIconSet( json: any, fontName: string, fontName_: string ): any;
 
+  export = createIconSet;
+}

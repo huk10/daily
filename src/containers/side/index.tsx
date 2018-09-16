@@ -16,7 +16,7 @@ export class Side extends React.Component<any, any> {
     super( props );
     this.store = props.store.Store;
     this.state = {
-      themeText: this.store.ThemeType === 'night' ? '白天': '夜间'
+      themeText: this.store.ThemeType === 'night' ? '白天' : '夜间'
     };
   }
 
@@ -39,28 +39,28 @@ export class Side extends React.Component<any, any> {
 
   render() {
     const { themeText } = this.state;
-    const {ThemeType} = this.store;
-    const IconType = ThemeType === 'night' ? 'white-balance-sunny':'weather-night';
-    const themeStyle = getThemeStyle(ThemeType);
+    const { ThemeType } = this.store;
+    const IconType = ThemeType === 'night' ? 'white-balance-sunny' : 'weather-night';
+    const themeStyle = getThemeStyle( ThemeType );
     return (
       <View style={styles.container}>
         <SideHeader/>
         <Navigator/>
-        <View style={[styles.footer,themeStyle.Side_footer_container]}>
+        <View style={[ styles.footer, themeStyle.Side_footer_container ]}>
           <View style={styles.footer_item}>
             <Icon name='download' size={18}
                   color={ThemeType === 'night' ? 'white' : '#666'}></Icon>
-            <Text style={[styles.footer_item_text, themeStyle.Side_footer_text]}>离线</Text>
+            <Text style={[ styles.footer_item_text, themeStyle.Side_footer_text ]}>离线</Text>
           </View>
           <View style={styles.footer_item}>
             <MaterialCommunityIcon
               name={IconType}
               size={18}
               color={ThemeType === 'night' ? 'white' : '#666'}/>
-            <Text style={[styles.footer_item_text,themeStyle.Side_footer_text]}
+            <Text style={[ styles.footer_item_text, themeStyle.Side_footer_text ]}
                   onPress={() => this.handlerSetThemeType()}>
               {themeText}
-              </Text>
+            </Text>
           </View>
         </View>
       </View>
