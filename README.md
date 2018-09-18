@@ -21,16 +21,7 @@ android 文章页面 左右滑动切换文章功能暂时还没有实现, 手势
 
 **react-native-vector-icons** 图标组件库 自带大量图标, 也可以添加自己的
 
-### 运行
-
-1. `yarn install` 
-2. 进入 `node_moudel/react-native-spinkit/android/src/build.gradle/`将
-  * `compileSdkVersion` 改为 26 
-  * `buildToolsVersion` 改为 26.0.3 
-  * `targetSdkVersion` 改为26 
- 
-
-##### 总结
+### 总结
 
 react-native 的水还是太深, 看来至少要对原生开发比较熟悉,才好,
 
